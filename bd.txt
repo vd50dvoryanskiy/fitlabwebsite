@@ -1,0 +1,690 @@
+--
+-- База данных: `fitness_club_db`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `Bookings`
+--
+
+CREATE TABLE `Bookings` (
+  `booking_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `schedule_id` int NOT NULL,
+  `booking_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `status` enum('active','completed','cancelled') DEFAULT 'active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `Bookings`
+--
+
+INSERT INTO `Bookings` (`booking_id`, `user_id`, `schedule_id`, `booking_date`, `status`) VALUES
+(6, 13, 26, '2025-06-25 14:00:00', 'active'),
+(7, 14, 27, '2025-06-25 14:30:00', 'completed'),
+(8, 15, 28, '2025-06-25 15:00:00', 'cancelled'),
+(9, 16, 29, '2025-06-25 15:30:00', 'active');
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `Memberships`
+--
+
+CREATE TABLE `Memberships` (
+  `membership_id` int NOT NULL,
+  `membership_type` varchar(100) NOT NULL,
+  `purchase_date` date DEFAULT (curdate()),
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `price` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `duration_days` int DEFAULT '30',
+  `description` text,
+  `features` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `Memberships`
+--
+
+INSERT INTO `Memberships` (`membership_id`, `membership_type`, `purchase_date`, `start_date`, `end_date`, `is_active`, `price`, `duration_days`, `description`, `features`) VALUES
+(11, 'Базовый', '2025-06-20', '2025-06-20', '2025-07-20', 1, '3000.00', 30, 'Подходит для начинающих. Легкий старт в мир фитнеса.', 'Тренажерный зал|4 групповых занятия в месяц'),
+(12, 'Стандартный', '2025-06-21', '2025-06-21', '2025-08-21', 1, '5000.00', 90, 'Для регулярных посетителей. Улучшенные возможности.', 'Тренажерный зал|Неограниченное количество групповых занятий|SPA-процедуры'),
+(13, 'Премиум', '2025-06-22', '2025-06-22', '2025-09-22', 1, '8000.00', 180, 'Максимальные возможности для активных пользователей.', 'Тренажерный зал|Персональные тренировки|SPA-процедуры|Гостевые визиты'),
+(14, 'Годовой', '2025-06-23', '2025-06-23', '2026-06-23', 1, '25000.00', 365, 'Максимум возможностей на целый год! Безлимитный доступ ко всему. Для настоящих патриотов спорта!', 'Тренажерный зал|Групповые занятия безлимит|Персональные тренировки безлимит|Сауна|Массаж безлимит|Гостевые визиты'),
+(15, 'Разовый', '2025-06-24', '2025-06-24', '2025-06-30', 1, '500.00', 1, 'Однократное посещение любого занятия.', 'Тренажерный зал|Одно групповое занятие');
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `Programs`
+--
+
+CREATE TABLE `Programs` (
+  `program_id` int NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  `duration_minutes` int NOT NULL,
+  `price` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `difficulty_level` enum('beginner','intermediate','advanced') DEFAULT 'beginner'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `Programs`
+--
+
+INSERT INTO `Programs` (`program_id`, `name`, `description`, `duration_minutes`, `price`, `difficulty_level`) VALUES
+(1, 'Программа \"Начинающий\"', 'Для тех, кто только начинает заниматься', 60, '500.00', 'beginner'),
+(2, 'Программа \"Профессионал\"', 'Для опытных спортсменов', 90, '1000.00', 'beginner'),
+(3, 'Программа \"Здоровье\"', 'Для поддержания здоровья и выносливости', 45, '300.00', 'beginner'),
+(4, 'Программа \"Похудение\"', 'Для снижения веса', 75, '700.00', 'beginner'),
+(5, 'Программа \"Сила\"', 'Фокус на развитие мышечной массы', 60, '600.00', 'beginner'),
+(7, 'Программа силовых тренировок', 'Интенсивные тренировки для продвинутых', 90, '800.00', 'advanced');
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `Rooms`
+--
+
+CREATE TABLE `Rooms` (
+  `room_id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `capacity` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `Rooms`
+--
+
+INSERT INTO `Rooms` (`room_id`, `name`, `capacity`) VALUES
+(13, 'Зал 1', 20),
+(14, 'Зал 2', 15),
+(15, 'Зал 3', 20),
+(16, 'Зал 4', 25),
+(17, 'Зал 5', 30);
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `Schedules`
+--
+
+CREATE TABLE `Schedules` (
+  `schedule_id` int NOT NULL,
+  `workout_type_id` int NOT NULL,
+  `trainer_id` int NOT NULL,
+  `room_id` int NOT NULL,
+  `schedule_date` date NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `max_participants` int DEFAULT NULL,
+  `available_spots` int NOT NULL DEFAULT '10',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `Schedules`
+--
+
+INSERT INTO `Schedules` (`schedule_id`, `workout_type_id`, `trainer_id`, `room_id`, `schedule_date`, `start_time`, `end_time`, `max_participants`, `available_spots`, `is_active`) VALUES
+(26, 18, 18, 13, '2025-06-27', '09:00:00', '10:00:00', 15, 15, 1),
+(27, 19, 19, 14, '2025-06-27', '10:30:00', '11:30:00', 10, 10, 1),
+(28, 20, 20, 15, '2025-06-27', '12:00:00', '13:00:00', 20, 20, 1),
+(29, 21, 21, 16, '2025-06-28', '09:30:00', '10:30:00', 12, 12, 1),
+(32, 18, 18, 13, '2025-07-01', '03:45:00', '04:45:00', 10, 10, 1),
+(33, 18, 18, 13, '2025-08-07', '05:08:00', '06:58:00', 10, 10, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `Trainers`
+--
+
+CREATE TABLE `Trainers` (
+  `trainer_id` int NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `specialization` varchar(100) DEFAULT NULL,
+  `hire_date` date DEFAULT (curdate())
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `Trainers`
+--
+
+INSERT INTO `Trainers` (`trainer_id`, `full_name`, `phone_number`, `email`, `specialization`, `hire_date`) VALUES
+(18, 'Александр Иванов', '+79001234567', 'ivanov@example.com', 'Йога', '2020-05-10'),
+(19, 'Мария Петрова', '+79007654321', 'petrova@example.com', 'Пилатес', '2021-08-20'),
+(20, 'Дмитрий Смирнов', '+79001122334', 'smirnov@example.com', 'Кардио', '2019-03-15'),
+(21, 'Екатерина Кузнецова', '+79002233445', 'kuznetsova@example.com', 'Силовая тренировка', '2022-01-10'),
+(25, 'Терехин Егор', '+78889991001', 'egor@gmail.com', 'Теквандо', '2025-06-30');
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `UserMemberships`
+--
+
+CREATE TABLE `UserMemberships` (
+  `user_membership_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `membership_id` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `UserMemberships`
+--
+
+INSERT INTO `UserMemberships` (`user_membership_id`, `user_id`, `membership_id`) VALUES
+(11, 13, 11),
+(12, 14, 12),
+(13, 15, 13),
+(14, 16, 14),
+(15, 17, 15);
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `Users`
+--
+
+CREATE TABLE `Users` (
+  `user_id` int NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `full_name` varchar(255) DEFAULT NULL,
+  `role` enum('admin','user') NOT NULL DEFAULT 'user',
+  `registration_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `last_login` datetime DEFAULT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `date_of_birth` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `Users`
+--
+
+INSERT INTO `Users` (`user_id`, `username`, `password_hash`, `email`, `full_name`, `role`, `registration_date`, `last_login`, `phone_number`, `date_of_birth`) VALUES
+(1, 'admin', '$2y$10$lFtxggXgClxg1qxhVXnSHuWqu2/yCZmHXhimOB1/X3tZyoLepRbs2', 'admin@gmail.com', 'Дмитрий', 'admin', '2025-06-23 12:27:02', '2025-07-01 22:51:32', '0', NULL),
+(13, 'user1', '$2y$10$lFtxggXgClxg1qxhVXnSHuWqu2/yCZmHXhimOB1/X3tZyoLepRbs2', 'user1@example.com', 'Иванов Иван', 'user', '2025-06-20 10:00:00', NULL, '+79001234567', '1990-01-01'),
+(14, 'user2', '$2y$10$lFtxggXgClxg1qxhVXnSHuWqu2/yCZmHXhimOB1/X3tZyoLepRbs2', 'user2@example.com', 'Петрова Мария', 'user', '2025-06-21 11:00:00', NULL, '+79007654321', '1995-05-15'),
+(15, 'user3', '$2y$10$lFtxggXgClxg1qxhVXnSHuWqu2/yCZmHXhimOB1/X3tZyoLepRbs2', 'user3@example.com', 'Смирнов Дмитрий', 'user', '2025-06-22 12:00:00', NULL, '+79001122334', '1985-08-22'),
+(16, 'user4', '$2y$10$lFtxggXgClxg1qxhVXnSHuWqu2/yCZmHXhimOB1/X3tZyoLepRbs2', 'user4@example.com', 'Кузнецова Екатерина', 'user', '2025-06-23 13:00:00', NULL, '+79002233445', '1998-03-10'),
+(17, 'user5', '$2y$10$lFtxggXgClxg1qxhVXnSHuWqu2/yCZmHXhimOB1/X3tZyoLepRbs2', 'user5@example.com', 'Новикова Ольга', 'user', '2025-06-24 14:00:00', NULL, '+79003344556', '2000-11-05'),
+(18, 'Бил', '$2y$10$cf6yx5Nf4I0LgKB2/m3XPuqt.cvpk/blpADS/rpnAeal2CO0xCUOy', 'bili@gmail.com', 'Боба Баба', 'user', '2025-06-30 14:11:46', '2025-06-30 14:13:13', '+73456789001', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Дублирующая структура для представления `view_1`
+-- (См. Ниже фактическое представление)
+--
+CREATE TABLE `view_1` (
+`booking_id` int
+,`email` varchar(255)
+,`end_time` time
+,`room_name` varchar(100)
+,`schedule_id` int
+,`start_time` time
+,`user_id` int
+,`user_name` varchar(255)
+,`workout_type` varchar(100)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Дублирующая структура для представления `view_2`
+-- (См. Ниже фактическое представление)
+--
+CREATE TABLE `view_2` (
+`total_bookings` bigint
+,`workout_name` varchar(100)
+,`workout_type_id` int
+);
+
+-- --------------------------------------------------------
+
+--
+-- Дублирующая структура для представления `view_3`
+-- (См. Ниже фактическое представление)
+--
+CREATE TABLE `view_3` (
+`end_time` time
+,`schedule_date` date
+,`schedule_id` int
+,`start_time` time
+,`trainer_id` int
+,`trainer_name` varchar(255)
+,`workout_type` varchar(100)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Дублирующая структура для представления `view_4`
+-- (См. Ниже фактическое представление)
+--
+CREATE TABLE `view_4` (
+`end_date` date
+,`is_active` tinyint(1)
+,`membership_id` int
+,`membership_type` varchar(100)
+,`purchase_date` date
+,`start_date` date
+,`user_id` int
+,`user_name` varchar(255)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Дублирующая структура для представления `view_5`
+-- (См. Ниже фактическое представление)
+--
+CREATE TABLE `view_5` (
+`total_bookings` bigint
+,`user_id` int
+,`user_name` varchar(255)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Дублирующая структура для представления `view_6`
+-- (См. Ниже фактическое представление)
+--
+CREATE TABLE `view_6` (
+`total_schedules` bigint
+,`workout_type` varchar(100)
+,`workout_type_id` int
+);
+
+-- --------------------------------------------------------
+
+--
+-- Дублирующая структура для представления `view_7`
+-- (См. Ниже фактическое представление)
+--
+CREATE TABLE `view_7` (
+`room_id` int
+,`room_name` varchar(100)
+,`schedule_date` date
+,`total_schedules` bigint
+);
+
+-- --------------------------------------------------------
+
+--
+-- Дублирующая структура для представления `view_8`
+-- (См. Ниже фактическое представление)
+--
+CREATE TABLE `view_8` (
+`end_date` date
+,`membership_id` int
+,`membership_type` varchar(100)
+,`start_date` date
+,`user_id` int
+,`user_name` varchar(255)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Дублирующая структура для представления `view_9`
+-- (См. Ниже фактическое представление)
+--
+CREATE TABLE `view_9` (
+`available_spots` int
+,`booked_spots` bigint
+,`end_time` time
+,`max_participants` int
+,`room_name` varchar(100)
+,`schedule_date` date
+,`schedule_id` int
+,`start_time` time
+,`trainer_name` varchar(255)
+,`workout_type` varchar(100)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Дублирующая структура для представления `view_10`
+-- (См. Ниже фактическое представление)
+--
+CREATE TABLE `view_10` (
+`total_schedules` bigint
+,`trainer_id` int
+,`trainer_name` varchar(255)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `WorkoutAttendances`
+--
+
+CREATE TABLE `WorkoutAttendances` (
+  `attendance_id` int NOT NULL,
+  `schedule_id` int NOT NULL,
+  `attendance_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `user_id` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `WorkoutAttendances`
+--
+
+INSERT INTO `WorkoutAttendances` (`attendance_id`, `schedule_id`, `attendance_date`, `user_id`) VALUES
+(13, 26, '2025-06-27 09:10:00', 13),
+(14, 27, '2025-06-27 10:40:00', 14),
+(15, 28, '2025-06-27 12:10:00', 15),
+(16, 29, '2025-06-28 09:40:00', 16),
+(17, 30, '2025-06-28 11:10:00', 17);
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `WorkoutTypes`
+--
+
+CREATE TABLE `WorkoutTypes` (
+  `workout_type_id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` text,
+  `difficulty_level` enum('beginner','intermediate','advanced') NOT NULL DEFAULT 'beginner',
+  `program_id` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `WorkoutTypes`
+--
+
+INSERT INTO `WorkoutTypes` (`workout_type_id`, `name`, `description`, `difficulty_level`, `program_id`) VALUES
+(18, 'Йога', 'Расслабляющая йога для начинающих и не только', 'beginner', 3),
+(19, 'Пилатес', 'Упражнения на гибкость и силу', 'intermediate', 4),
+(20, 'Кардио', 'Интенсивная кардиотренировка', 'advanced', 4),
+(21, 'Стрейчинг', 'Тренировка на растяжку мышц', 'beginner', 1),
+(22, 'Силовая тренировка', 'Поднятие тяжелых весов', 'advanced', 5);
+
+-- --------------------------------------------------------
+
+--
+-- Структура для представления `view_1`
+--
+DROP TABLE IF EXISTS `view_1`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `view_1`  AS SELECT `u`.`user_id` AS `user_id`, `u`.`full_name` AS `user_name`, `u`.`email` AS `email`, `b`.`booking_id` AS `booking_id`, `s`.`schedule_id` AS `schedule_id`, `s`.`start_time` AS `start_time`, `s`.`end_time` AS `end_time`, `wt`.`name` AS `workout_type`, `r`.`name` AS `room_name` FROM ((((`users` `u` join `bookings` `b` on((`u`.`user_id` = `b`.`user_id`))) join `schedules` `s` on((`b`.`schedule_id` = `s`.`schedule_id`))) join `workouttypes` `wt` on((`s`.`workout_type_id` = `wt`.`workout_type_id`))) join `rooms` `r` on((`s`.`room_id` = `r`.`room_id`)))  ;
+
+-- --------------------------------------------------------
+
+--
+-- Структура для представления `view_2`
+--
+DROP TABLE IF EXISTS `view_2`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `view_2`  AS SELECT `wt`.`workout_type_id` AS `workout_type_id`, `wt`.`name` AS `workout_name`, count(`b`.`booking_id`) AS `total_bookings` FROM ((`workouttypes` `wt` join `schedules` `s` on((`wt`.`workout_type_id` = `s`.`workout_type_id`))) join `bookings` `b` on((`s`.`schedule_id` = `b`.`schedule_id`))) GROUP BY `wt`.`workout_type_id`, `wt`.`name``name`  ;
+
+-- --------------------------------------------------------
+
+--
+-- Структура для представления `view_3`
+--
+DROP TABLE IF EXISTS `view_3`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `view_3`  AS SELECT `t`.`trainer_id` AS `trainer_id`, `t`.`full_name` AS `trainer_name`, `s`.`schedule_id` AS `schedule_id`, `s`.`schedule_date` AS `schedule_date`, `s`.`start_time` AS `start_time`, `s`.`end_time` AS `end_time`, `wt`.`name` AS `workout_type` FROM ((`trainers` `t` join `schedules` `s` on((`t`.`trainer_id` = `s`.`trainer_id`))) join `workouttypes` `wt` on((`s`.`workout_type_id` = `wt`.`workout_type_id`)))  ;
+
+-- --------------------------------------------------------
+
+--
+-- Структура для представления `view_4`
+--
+DROP TABLE IF EXISTS `view_4`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `view_4`  AS SELECT `u`.`user_id` AS `user_id`, `u`.`full_name` AS `user_name`, `m`.`membership_id` AS `membership_id`, `m`.`membership_type` AS `membership_type`, `m`.`purchase_date` AS `purchase_date`, `m`.`start_date` AS `start_date`, `m`.`end_date` AS `end_date`, `m`.`is_active` AS `is_active` FROM ((`users` `u` join `usermemberships` `um` on((`u`.`user_id` = `um`.`user_id`))) join `memberships` `m` on((`um`.`membership_id` = `m`.`membership_id`)))  ;
+
+-- --------------------------------------------------------
+
+--
+-- Структура для представления `view_5`
+--
+DROP TABLE IF EXISTS `view_5`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `view_5`  AS SELECT `u`.`user_id` AS `user_id`, `u`.`full_name` AS `user_name`, count(`b`.`booking_id`) AS `total_bookings` FROM (`users` `u` left join `bookings` `b` on((`u`.`user_id` = `b`.`user_id`))) GROUP BY `u`.`user_id`, `u`.`full_name``full_name`  ;
+
+-- --------------------------------------------------------
+
+--
+-- Структура для представления `view_6`
+--
+DROP TABLE IF EXISTS `view_6`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `view_6`  AS SELECT `wt`.`workout_type_id` AS `workout_type_id`, `wt`.`name` AS `workout_type`, count(`s`.`schedule_id`) AS `total_schedules` FROM (`workouttypes` `wt` left join `schedules` `s` on((`wt`.`workout_type_id` = `s`.`workout_type_id`))) GROUP BY `wt`.`workout_type_id`, `wt`.`name``name`  ;
+
+-- --------------------------------------------------------
+
+--
+-- Структура для представления `view_7`
+--
+DROP TABLE IF EXISTS `view_7`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `view_7`  AS SELECT `r`.`room_id` AS `room_id`, `r`.`name` AS `room_name`, `s`.`schedule_date` AS `schedule_date`, count(`s`.`schedule_id`) AS `total_schedules` FROM (`rooms` `r` left join `schedules` `s` on((`r`.`room_id` = `s`.`room_id`))) GROUP BY `r`.`room_id`, `r`.`name`, `s`.`schedule_date``schedule_date`  ;
+
+-- --------------------------------------------------------
+
+--
+-- Структура для представления `view_8`
+--
+DROP TABLE IF EXISTS `view_8`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `view_8`  AS SELECT `u`.`user_id` AS `user_id`, `u`.`full_name` AS `user_name`, `m`.`membership_id` AS `membership_id`, `m`.`membership_type` AS `membership_type`, `m`.`start_date` AS `start_date`, `m`.`end_date` AS `end_date` FROM ((`users` `u` join `usermemberships` `um` on((`u`.`user_id` = `um`.`user_id`))) join `memberships` `m` on((`um`.`membership_id` = `m`.`membership_id`))) WHERE ((`m`.`is_active` = 1) AND (curdate() between `m`.`start_date` and `m`.`end_date`))  ;
+
+-- --------------------------------------------------------
+
+--
+-- Структура для представления `view_9`
+--
+DROP TABLE IF EXISTS `view_9`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `view_9`  AS SELECT `s`.`schedule_id` AS `schedule_id`, `s`.`schedule_date` AS `schedule_date`, `s`.`start_time` AS `start_time`, `s`.`end_time` AS `end_time`, `wt`.`name` AS `workout_type`, `t`.`full_name` AS `trainer_name`, `r`.`name` AS `room_name`, `s`.`max_participants` AS `max_participants`, `s`.`available_spots` AS `available_spots`, count(`b`.`booking_id`) AS `booked_spots` FROM ((((`schedules` `s` join `workouttypes` `wt` on((`s`.`workout_type_id` = `wt`.`workout_type_id`))) join `trainers` `t` on((`s`.`trainer_id` = `t`.`trainer_id`))) join `rooms` `r` on((`s`.`room_id` = `r`.`room_id`))) left join `bookings` `b` on((`s`.`schedule_id` = `b`.`schedule_id`))) GROUP BY `s`.`schedule_id`, `s`.`schedule_date`, `s`.`start_time`, `s`.`end_time`, `wt`.`name`, `t`.`full_name`, `r`.`name`, `s`.`max_participants`, `s`.`available_spots``available_spots`  ;
+
+-- --------------------------------------------------------
+
+--
+-- Структура для представления `view_10`
+--
+DROP TABLE IF EXISTS `view_10`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `view_10`  AS SELECT `t`.`trainer_id` AS `trainer_id`, `t`.`full_name` AS `trainer_name`, count(`s`.`schedule_id`) AS `total_schedules` FROM (`trainers` `t` left join `schedules` `s` on((`t`.`trainer_id` = `s`.`trainer_id`))) GROUP BY `t`.`trainer_id`, `t`.`full_name``full_name`  ;
+
+--
+-- Индексы сохранённых таблиц
+--
+
+--
+-- Индексы таблицы `Bookings`
+--
+ALTER TABLE `Bookings`
+  ADD PRIMARY KEY (`booking_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `schedule_id` (`schedule_id`);
+
+--
+-- Индексы таблицы `Memberships`
+--
+ALTER TABLE `Memberships`
+  ADD PRIMARY KEY (`membership_id`);
+
+--
+-- Индексы таблицы `Programs`
+--
+ALTER TABLE `Programs`
+  ADD PRIMARY KEY (`program_id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Индексы таблицы `Rooms`
+--
+ALTER TABLE `Rooms`
+  ADD PRIMARY KEY (`room_id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Индексы таблицы `Schedules`
+--
+ALTER TABLE `Schedules`
+  ADD PRIMARY KEY (`schedule_id`),
+  ADD KEY `workout_type_id` (`workout_type_id`),
+  ADD KEY `trainer_id` (`trainer_id`),
+  ADD KEY `room_id` (`room_id`);
+
+--
+-- Индексы таблицы `Trainers`
+--
+ALTER TABLE `Trainers`
+  ADD PRIMARY KEY (`trainer_id`);
+
+--
+-- Индексы таблицы `UserMemberships`
+--
+ALTER TABLE `UserMemberships`
+  ADD PRIMARY KEY (`user_membership_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `membership_id` (`membership_id`);
+
+--
+-- Индексы таблицы `Users`
+--
+ALTER TABLE `Users`
+  ADD PRIMARY KEY (`user_id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- Индексы таблицы `WorkoutAttendances`
+--
+ALTER TABLE `WorkoutAttendances`
+  ADD PRIMARY KEY (`attendance_id`),
+  ADD KEY `workoutattendances_ibfk_2` (`schedule_id`),
+  ADD KEY `users_id` (`user_id`);
+
+--
+-- Индексы таблицы `WorkoutTypes`
+--
+ALTER TABLE `WorkoutTypes`
+  ADD PRIMARY KEY (`workout_type_id`),
+  ADD UNIQUE KEY `name` (`name`),
+  ADD KEY `program_id` (`program_id`);
+
+--
+-- AUTO_INCREMENT для сохранённых таблиц
+--
+
+--
+-- AUTO_INCREMENT для таблицы `Bookings`
+--
+ALTER TABLE `Bookings`
+  MODIFY `booking_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT для таблицы `Memberships`
+--
+ALTER TABLE `Memberships`
+  MODIFY `membership_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT для таблицы `Programs`
+--
+ALTER TABLE `Programs`
+  MODIFY `program_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT для таблицы `Rooms`
+--
+ALTER TABLE `Rooms`
+  MODIFY `room_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT для таблицы `Schedules`
+--
+ALTER TABLE `Schedules`
+  MODIFY `schedule_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+
+--
+-- AUTO_INCREMENT для таблицы `Trainers`
+--
+ALTER TABLE `Trainers`
+  MODIFY `trainer_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+
+--
+-- AUTO_INCREMENT для таблицы `UserMemberships`
+--
+ALTER TABLE `UserMemberships`
+  MODIFY `user_membership_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT для таблицы `Users`
+--
+ALTER TABLE `Users`
+  MODIFY `user_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT для таблицы `WorkoutAttendances`
+--
+ALTER TABLE `WorkoutAttendances`
+  MODIFY `attendance_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT для таблицы `WorkoutTypes`
+--
+ALTER TABLE `WorkoutTypes`
+  MODIFY `workout_type_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+
+--
+-- Ограничения внешнего ключа сохраненных таблиц
+--
+
+--
+-- Ограничения внешнего ключа таблицы `Bookings`
+--
+ALTER TABLE `Bookings`
+  ADD CONSTRAINT `bookings_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `bookings_ibfk_2` FOREIGN KEY (`schedule_id`) REFERENCES `Schedules` (`schedule_id`) ON DELETE CASCADE;
+
+--
+-- Ограничения внешнего ключа таблицы `Schedules`
+--
+ALTER TABLE `Schedules`
+  ADD CONSTRAINT `schedules_ibfk_1` FOREIGN KEY (`workout_type_id`) REFERENCES `WorkoutTypes` (`workout_type_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `schedules_ibfk_2` FOREIGN KEY (`trainer_id`) REFERENCES `Trainers` (`trainer_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `schedules_ibfk_3` FOREIGN KEY (`room_id`) REFERENCES `Rooms` (`room_id`) ON DELETE CASCADE;
+
+--
+-- Ограничения внешнего ключа таблицы `UserMemberships`
+--
+ALTER TABLE `UserMemberships`
+  ADD CONSTRAINT `usermemberships_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `usermemberships_ibfk_2` FOREIGN KEY (`membership_id`) REFERENCES `Memberships` (`membership_id`) ON DELETE CASCADE;
+
+--
+-- Ограничения внешнего ключа таблицы `WorkoutAttendances`
+--
+ALTER TABLE `WorkoutAttendances`
+  ADD CONSTRAINT `workoutattendances_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Ограничения внешнего ключа таблицы `WorkoutTypes`
+--
+ALTER TABLE `WorkoutTypes`
+  ADD CONSTRAINT `workouttypes_ibfk_1` FOREIGN KEY (`program_id`) REFERENCES `Programs` (`program_id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
